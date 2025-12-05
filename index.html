@@ -46,23 +46,43 @@
             resize: none;
             border-radius: 6px;
         }
-        button {
+        #quantidadeInput {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            background-color: #171923;
+            color: #ffffff;
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+        }
+        .button-group button {
             background-color: #48bb78; /* Verde */
             color: white;
-            padding: 14px 20px;
+            padding: 12px 10px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            width: 100%;
-            font-size: 17px;
+            width: 48%; /* 48% para caber dois lado a lado com margem */
+            font-size: 16px;
             font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s;
         }
-        button:hover {
+        .button-group button:hover {
             background-color: #68d391;
         }
-        button:active {
-            transform: translateY(1px);
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .full-width-button {
+            width: 100%;
+            margin-top: 10px;
+            background-color: #63b3ed; /* Azul para o botão de teste */
+        }
+        .full-width-button:hover {
+            background-color: #90cdf4;
         }
         .info {
             margin-top: 30px;
@@ -85,20 +105,28 @@
     <div class="container">
         <h2>🔑 Simulador de Key Checker (Console)</h2>
         
-        <label for="keyInput">Cole/Gere suas chaves (formato XXXXX-XXXXX-XXXXX):</label>
-        <textarea id="keyInput" rows="10" placeholder="Chaves são geradas automaticamente ao carregar.&#10;Cole novas chaves (uma por linha ou vírgula) para testar."></textarea>
+        <label for="quantidadeInput">Quantidade de chaves a gerar (Formato XXXXX-XXXXX-XXXXX):</label>
+        <input type="number" id="quantidadeInput" value="10" min="1" max="1000">
+
+        <div class="button-group">
+            <button onclick="gerarChaves()">Gerar Chaves</button>
+            <button onclick="limparChaves()" style="background-color: #e53e3e;">Limpar Campo</button>
+        </div>
         
-        <button onclick="iniciarSimulacao()">Simular Teste das Chaves</button>
+        <label for="keyInput">Cole suas chaves para simular o teste:</label>
+        <textarea id="keyInput" rows="10" placeholder="Chaves geradas aparecerão aqui. Cole novas chaves (uma por linha ou vírgula) para testar."></textarea>
+        
+        <button class="full-width-button" onclick="iniciarSimulacao()">Simular Teste das Chaves</button>
 
         <div class="info">
             <strong>Instruções:</strong>
-            <p>1. O campo já vem preenchido com **chaves aleatórias e inválidas**.</p>
-            <p>2. Clique no botão **"Simular Teste das Chaves"**.</p>
+            <p>1. Defina a quantidade e clique em **Gerar Chaves**.</p>
+            <p>2. Clique em **Simular Teste das Chaves**.</p>
             <p>3. **Abra o Console do Navegador** (pressione **F12** e vá na aba "Console") para ver os testes simulados. O simulador dará um **SUCESSO** aleatório (1 em 50) para demonstração.</p>
         </div>
 
         <p class="warning">
-            AVISO: Este é apenas um simulador. As chaves geradas/testadas são **falsas** e não são válidas na Steam.
+            AVISO: Este é apenas um simulador. As chaves geradas/testadas são **falsas** e **não são válidas** na Steam.
         </p>
     </div>
 
@@ -118,18 +146,33 @@
             }
             return chave;
         }
-        
-        // Preenche o campo de texto com 5 chaves aleatórias ao carregar
-        document.addEventListener('DOMContentLoaded', () => {
+
+        // Função para preencher o campo de texto com as chaves geradas
+        function gerarChaves() {
+            const quantidade = parseInt(document.getElementById('quantidadeInput').value);
             const campo = document.getElementById('keyInput');
-            let chavesIniciais = [];
-            for (let i = 0; i < 5; i++) {
-                chavesIniciais.push(gerarChaveFalsa());
+            
+            if (isNaN(quantidade) || quantidade <= 0) {
+                alert("Por favor, insira uma quantidade válida.");
+                return;
             }
-            campo.value = chavesIniciais.join('\n');
-        });
+            
+            let chavesGeradas = [];
+            for (let i = 0; i < quantidade; i++) {
+                chavesGeradas.push(gerarChaveFalsa());
+            }
+            campo.value = chavesGeradas.join('\n');
+            console.log(`%c ${quantidade} chaves aleatórias geradas e adicionadas ao campo.`, 'color: #48bb78; font-weight: bold;');
+        }
 
-
+        // Função para limpar o campo de texto
+        function limparChaves() {
+            document.getElementById('keyInput').value = '';
+            console.clear();
+            console.log('%c Campo de chaves limpo.', 'color: #e53e3e;');
+        }
+        
+        // Função principal para iniciar a simulação de teste
         function iniciarSimulacao() {
             const keyInput = document.getElementById('keyInput').value;
             
@@ -140,7 +183,7 @@
 
             if (chaves.length === 0) {
                 console.error("Por favor, cole chaves válidas no formato XXXXX-XXXXX-XXXXX.");
-                alert("Erro: Não foram encontradas chaves válidas no formato XXXXX-XXXXX-XXXXX. Verifique o console (F12) para mais detalhes.");
+                alert("Erro: Não foram encontradas chaves válidas no formato XXXXX-XXXXX-XXXXX.");
                 return;
             }
 
@@ -162,7 +205,7 @@
                     console.log(`[${index + 1}/${chaves.length}] Testando... ${chave}`);
                     
                     if (resultado_simulado) {
-                        // Mensagem de sucesso simulado
+                        // Mensagem de sucesso simulado (para atender ao seu pedido de "ter chance de ser válida")
                         console.log(`%c[✅ SUCESSO SIMULADO] A chave ${chave} *PARECE* estar OK!`, 'color: #38a169; font-weight: bold; background-color: #1d402e; padding: 2px;');
                     } else {
                         // Mensagem de falha simulada
@@ -175,6 +218,10 @@
                 }, tempoBase);
             });
         }
+        
+        // Gera 10 chaves ao carregar a página inicialmente
+        document.addEventListener('DOMContentLoaded', gerarChaves);
+
     </script>
 </body>
 </html>
